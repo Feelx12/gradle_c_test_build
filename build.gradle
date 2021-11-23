@@ -1,30 +1,51 @@
 plugins {
     id 'c'
-    id 'cunit-test-suite'
 }
 
-model {
-    flavors {
-        passing
-        failing
-    }
-    platforms {
-        x86 {
-            if (operatingSystem.macOsX) {
-                architecture "x64"
-            } else {
-                architecture "x86"
+// =================================
+
+sources {
+    hello {
+        c {
+            source {
+                srcDir "src/source"
+                include "**/*.c"
+            }
+            exportedHeaders {
+                srcDir "src/include"
             }
         }
     }
-    components {
-        operators(NativeLibrarySpec) {
-            targetPlatform "x86"
+}
+
+// =================================
+
+model {
+    toolChains {
+        gcc(Gcc) {
+            target("arm"){
+                cppCompiler.withArguments { args ->
+                    args << "-m32"
+                }
+                linker.withArguments { args ->
+                    args << "-m32"
+                }
+            }
+            target("sparc")
         }
     }
-    testSuites {
-        operatorsTest(CUnitTestSuiteSpec) {
-            testing $.components.operators
+    platforms {
+        arm {
+            architecture "arm"
+        }
+        sparc {
+            architecture "sparc"
+        }
+    }
+    components {
+        main(NativeExecutableSpec) {
+            targetPlatform "arm"
+            targetPlatform "sparc"
         }
     }
 }
